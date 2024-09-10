@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #111;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        #jogo {
+            display: inline-block;
+            margin-top: 50px;
+            padding: 20px;
+            border-radius: 15px;
+            background: linear-gradient(145deg, #333, #222);
+            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.5);
+        }
+
+        #quadro {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 10px;
+            margin: 20px auto;
+        }
+
+        .celula {
+            width: 100px;
+            height: 100px;
+            background: #222;
+            border: 2px solid #0ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .celula:hover {
+            background: #111;
+            box-shadow: 0 0 15px #0ff;
+        }
+
+        #mensagem {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background: #0ff;
+            border: none;
+            border-radius: 5px;
+            color: #111;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            background: #0cc;
+            box-shadow: 0 0 10px #0ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="jogo">
+        <h1>Jogo da Velha</h1>
+        <div id="mensagem">É a vez do jogador X</div>
+        <div id="quadro">
+            <div class="celula" data-index="0"></div>
+            <div class="celula" data-index="1"></div>
+            <div class="celula" data-index="2"></div>
+            <div class="celula" data-index="3"></div>
+            <div class="celula" data-index="4"></div>
+            <div class="celula" data-index="5"></div>
+            <div class="celula" data-index="6"></div>
+            <div class="celula" data-index="7"></div>
+            <div class="celula" data-index="8"></div>
+        </div>
+        <button id="reset">Reiniciar Jogo</button>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const quadro = document.getElementById('quadro');
+            const celulas = quadro.querySelectorAll('.celula');
+            const mensagem = document.getElementById('mensagem');
+            const resetButton = document.getElementById('reset');
+
+            let currentPlayer = 'X';
+            let boardState = Array(9).fill(null);
+            let gameActive = true;
+
+            function checkWinner() {
+                const combinacoesVencedoras = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
+                    [0, 4, 8], [2, 4, 6] // Diagonais
+                ];
+
+                for (const combinacao of combinacoesVencedoras) {
+                    const [a, b, c] = combinacao;
+                    if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+                        return boardState[a];
+                    }
+                }
+
+                return boardState.every(celula => celula) ? 'T' : null;
+            }
+
+            function handleClick(event) {
+                if (!gameActive) return;
+
+                const celula = event.target;
+                const index = celula.getAttribute('data-index');
+
+                if (boardState[index] || !celula.classList.contains('celula')) return;
+
+                boardState[index] = currentPlayer;
+                celula.textContent = currentPlayer;
+
+                const vencedor = checkWinner();
+
+                if (vencedor) {
+                    if (vencedor === 'T') {
+                        mensagem.textContent = "Empate!";
+                    } else {
+                        mensagem.textContent = `Jogador ${vencedor} venceu!`;
+                    }
+                    gameActive = false;
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    mensagem.textContent = `É a vez do jogador ${currentPlayer}`;
+                }
+            }
+
+            function resetGame() {
+                boardState = Array(9).fill(null);
+                gameActive = true;
+                currentPlayer = 'X';
+                mensagem.textContent = `É a vez do jogador ${currentPlayer}`;
+                celulas.forEach(celula => celula.textContent = '');
+            }
+
+            quadro.addEventListener('click', handleClick);
+            resetButton.addEventListener('click', resetGame);
+        });
+    </script>
+</body>
+</html>
